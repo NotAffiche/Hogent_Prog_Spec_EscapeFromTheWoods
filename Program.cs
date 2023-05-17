@@ -8,10 +8,10 @@ namespace EscapeFromTheWoods
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            //Stopwatch stopwatch = new Stopwatch();
-            //stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             Console.WriteLine("Hello World!");
             string connectionString = @"Data Source=.\SQLExpress;Initial Catalog=EscapeFromTheWoods;Integrated Security=True";
             DBwriter db = new DBwriter(connectionString);
@@ -46,47 +46,33 @@ namespace EscapeFromTheWoods
             //w1.Escape();
             //w2.Escape();
             //w3.Escape();
-            Thread tOld = new Thread(() =>
-            {
-                Stopwatch stopwatchOld = new Stopwatch();
-                Console.WriteLine("Old way:");
-                stopwatchOld.Start();
-                w1.WriteWoodToDB();
-                w2.WriteWoodToDB();
-                w3.WriteWoodToDB();
-                w1.Escape();
-                w2.Escape();
-                w3.Escape();
-                stopwatchOld.Stop();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Time elapsed OLD: {0}", stopwatchOld.Elapsed);
-                Console.ForegroundColor = ConsoleColor.White;
-            });
-            tOld.Start();
-            Thread tNewWay = new Thread(() =>
-            {
-                Stopwatch stopwatchRefactored = new Stopwatch();
-                Console.WriteLine("Refactored:");
-                stopwatchRefactored.Start();
-                List<Task> tasks = new List<Task>();
-                tasks.Add(Task.Run(() => w1.AsyncWriteWoodToDB()));
-                tasks.Add(Task.Run(() => w2.AsyncWriteWoodToDB()));
-                tasks.Add(Task.Run(() => w3.AsyncWriteWoodToDB()));
-                tasks.Add(Task.Run(() => w1.AsyncEscape()));
-                tasks.Add(Task.Run(() => w2.AsyncEscape()));
-                tasks.Add(Task.Run(() => w3.AsyncEscape()));
-                Task.WaitAll(tasks.ToArray());
-                stopwatchRefactored.Stop();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Time elapsed REFACTORED: {0}", stopwatchRefactored.Elapsed);
-                Console.ForegroundColor = ConsoleColor.White;
-            });
-            tNewWay.Start();
 
-            //stopwatch.Stop();
-            //// Write result.
-            //Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+            ///New Refactored/Async way
+            ///
+
+            Task writeWood1Task = w1.AsyncWriteWoodToDB();
+            Task writeWood2Task = w2.AsyncWriteWoodToDB();
+            Task writeWood3Task = w3.AsyncWriteWoodToDB();
+
+            await Task.WhenAll(writeWood1Task, writeWood2Task, writeWood3Task);
+
+            Task escapeWood1 = w1.AsyncEscape();
+            Task escapeWood2 = w2.AsyncEscape();
+            Task escapeWood3 = w3.AsyncEscape();
+
+            await Task.WhenAll(escapeWood1, escapeWood2, escapeWood3);
+
+            ///
+            ///End Refactored/Async way
+
+
+            stopwatch.Stop();
+            // Write result.
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+            Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("end");
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

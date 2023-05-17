@@ -8,7 +8,7 @@ namespace EscapeFromTheWoods
     {        
         public static Wood GetWood(int size,Map map,string path,DBwriter db)
         {
-            Random r = new Random(100);
+            Random r = new Random(100);//Random r = new Random(100);
             List<Tree> trees = new List<Tree>();
             int n = 0;
             while(n<size)
