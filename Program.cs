@@ -13,8 +13,9 @@ namespace EscapeFromTheWoods
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             Console.WriteLine("Hello World!");
-            string connectionString = @"Data Source=.\SQLExpress;Initial Catalog=EscapeFromTheWoods;Integrated Security=True";
-            DBwriter db = new DBwriter(connectionString);
+            string msSqlConnectionString = @"Data Source=.\SQLExpress;Initial Catalog=EscapeFromTheWoods;Integrated Security=True";
+            string mongoDbConnectionString = "mongodb://localhost:27017";
+            DBwriter db = new DBwriter(msSqlConnectionString, mongoDbConnectionString);
 
             string path = @"C:\NET\monkeys";
             Map m1 = new Map(0, 500, 0, 500);

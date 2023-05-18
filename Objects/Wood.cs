@@ -169,7 +169,7 @@ namespace EscapeFromTheWoods
             {
                 routes.Add(await AsyncEscapeMonkey(m, map));
             }
-            await AsyncWriteEscaperoutesToBitmap(routes);
+            AsyncWriteEscaperoutesToBitmap(routes);
         }
         private async Task AsyncWriteRouteToDB(Monkey monkey, List<Tree> route)
         {
@@ -180,11 +180,12 @@ namespace EscapeFromTheWoods
             {
                 records.Add(new DBMonkeyRecord(monkey.monkeyID, monkey.name, woodID, j, route[j].treeID, route[j].x, route[j].y));
             }
-            await db.AsyncWriteMonkeyRecords(records);
+            //await db.AsyncWriteMonkeyRecordsMSSQL(records);//old sql serv
+            await db.AsyncWriteMonkeyRecordsMongoDB(records);//new mongodb
             Console.ForegroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine($"{woodID}:write db routes {woodID},{monkey.name} end");
         }
-        public async Task AsyncWriteEscaperoutesToBitmap(List<List<Tree>> routes)
+        public void AsyncWriteEscaperoutesToBitmap(List<List<Tree>> routes)
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"{woodID}:write bitmap routes {woodID} start");
@@ -227,16 +228,13 @@ namespace EscapeFromTheWoods
             {
                 records.Add(new DBWoodRecord(woodID, t.treeID, t.x, t.y));
             }
-            await db.AsyncWriteWoodRecords(records);
+            //await db.AsyncWriteWoodRecordsMSSQL(records);//old sql serv
+            await db.AsyncWriteWoodRecordsMongoDB(records);//new mongodb
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"{woodID}:write db wood {woodID} end");
         }
         public async Task<List<Tree>> AsyncEscapeMonkey(Monkey monkey, Map map)
         {
-            if (monkey.monkeyID==7)
-            {
-                int x = 3;
-            }
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine($"{woodID}:start {woodID},{monkey.name}");
             HashSet<int> visited = new HashSet<int>();
@@ -281,6 +279,7 @@ namespace EscapeFromTheWoods
             while (true);
         }
 
+        #region grid methods
         private (int, int) FindCell(int x, int y, TreeGrid tg)
         {
             if (!tg.XYBoundary.WithinBounds(x, y)) throw new ArgumentOutOfRangeException("out of bounds");
@@ -329,6 +328,7 @@ namespace EscapeFromTheWoods
                 if (IsValidCell(gx, gy, tg)) ProcessCell(dtm, tg, gx, gy, m, n, v);
             }
         }
+        #endregion
         //
     }
 }

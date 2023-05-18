@@ -1,25 +1,35 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EscapeFromTheWoods
 {
     public class DBwriter
     {
-        private string connectionString;
+        private string msSqlConnectionString;
+        private string mongoDbConnectionString;
+        private IMongoClient mongoClient;
+        private IMongoDatabase mongoDB;
 
-        public DBwriter(string connectionString)
+        public DBwriter(string msSqlConnectionString, string mongoDbConnectionString)
         {
-            this.connectionString = connectionString;
+            this.msSqlConnectionString = msSqlConnectionString;
+            this.mongoDbConnectionString = mongoDbConnectionString;
+            mongoClient = new MongoClient(mongoDbConnectionString);
+            mongoDB = mongoClient.GetDatabase("EscapeFromTheWoods");
         }
 
         private SqlConnection getConnection()
         {
-            SqlConnection connection = new SqlConnection(connectionString);
+            SqlConnection connection = new SqlConnection(msSqlConnectionString);
             return connection;
         }
+
         #region OLD
         public void WriteWoodRecords(List<DBWoodRecord> data)
         {
@@ -97,7 +107,8 @@ namespace EscapeFromTheWoods
         #endregion
 
         #region REFACTORED / ASYNC
-        public async Task AsyncWriteWoodRecords(List<DBWoodRecord> data)
+        //ms sql
+        public async Task AsyncWriteWoodRecordsMSSQL(List<DBWoodRecord> data)
         {
             string query = "INSERT INTO dbo.WoodRecords (woodID, treeID, x, y) VALUES (@woodID, @treeID, @x, @y)";
             using (SqlConnection connection = getConnection())
@@ -133,7 +144,7 @@ namespace EscapeFromTheWoods
                 }
             }
         }
-        public async Task AsyncWriteMonkeyRecords(List<DBMonkeyRecord> data)
+        public async Task AsyncWriteMonkeyRecordsMSSQL(List<DBMonkeyRecord> data)
         {
             string query = "INSERT INTO dbo.MonkeyRecords (monkeyID,monkeyName,woodID, seqNr,treeID,x,y) VALUES(@monkeyID,@monkeyName,@woodID,@seqNr,@treeID,@x,@y)";
             using (SqlConnection connection = getConnection())
@@ -175,6 +186,42 @@ namespace EscapeFromTheWoods
                 }
             }
         }
+        //
+
+        //mongodb
+        public async Task AsyncWriteWoodRecordsMongoDB(List<DBWoodRecord> data)
+        {
+            var collection = mongoDB.GetCollection<BsonDocument>("WoodRecords");
+
+            var documents = data.Select(x => new BsonDocument
+            {
+                { "woodID", x.woodID },
+                { "treeID", x.treeID },
+                { "x", x.x },
+                { "y", x.y }
+            });
+
+            await collection.InsertManyAsync(documents);
+        }
+
+        public async Task AsyncWriteMonkeyRecordsMongoDB(List<DBMonkeyRecord> data)
+        {
+            var collection = mongoDB.GetCollection<BsonDocument>("MonkeyRecords");
+
+            var documents = data.Select(x => new BsonDocument
+            {
+                { "monkeyID", x.monkeyID },
+                { "monkeyName", x.monkeyName },
+                { "woodID", x.woodID },
+                { "seqNr", x.seqNr },
+                { "treeID", x.treeID },
+                { "x", x.x },
+                { "y", x.y }
+            });
+
+            await collection.InsertManyAsync(documents);
+        }
+        //
         #endregion
     }
 }
