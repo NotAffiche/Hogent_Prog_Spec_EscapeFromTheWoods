@@ -46,9 +46,12 @@ namespace EscapeFromTheWoods
             //w1.Escape();
             //w2.Escape();
             //w3.Escape();
+            //Time elapsed: 00:00:02.1623876 | 1272 | 5000
 
             ///New Refactored/Async way
             ///
+
+            #region t1/Refactored
 
             Task writeWood1Task = w1.AsyncWriteWoodToDB();
             Task writeWood2Task = w2.AsyncWriteWoodToDB();
@@ -56,11 +59,34 @@ namespace EscapeFromTheWoods
 
             await Task.WhenAll(writeWood1Task, writeWood2Task, writeWood3Task);
 
-            Task escapeWood1 = w1.AsyncEscape();
-            Task escapeWood2 = w2.AsyncEscape();
-            Task escapeWood3 = w3.AsyncEscape();
+            Task escapeWood1 = w1.AsyncEscape(m1);
+            Task escapeWood2 = w2.AsyncEscape(m2);
+            Task escapeWood3 = w3.AsyncEscape(m3);
 
             await Task.WhenAll(escapeWood1, escapeWood2, escapeWood3);
+            //Time elapsed: 00:00:01.2334299 remove from tree grid
+            //Time elapsed: 00:00:01.0762059 | 1350 | 5000 use hashset visisted
+
+            #endregion
+
+            #region test2
+            //w2.WriteWoodToDB();
+            //w2.Escape();
+
+            //Andere route dan non refactored want: 1) apen springen tegelijkertijd dus lege bomen ipv een boom met een aap erin die wacht om te springen
+            //en b) zoals hieronder (2 punten met zelfde afstand, kiest bij mij telkens het andere punt dan in non async/refactored, is wel consequent er in)
+            //m.a.w. mijn apen hebben pech (kiezen de langere route aangezien dat in totaal 1350 records van sprongen zijn ipv 1272) (ze zijn ook ongeduldiger
+            //want ze wachten niet tot als de vorige aap klaar is met springen, beginnen allemaal tegelijk ;) )
+
+            //double dOG = Math.Sqrt(Math.Pow(67 - 64, 2) + Math.Pow(330 - 328, 2));
+            //double dREF = Math.Sqrt(Math.Pow(61 - 64, 2) + Math.Pow(326 - 328, 2));
+            //Console.WriteLine($"dog: {dOG} | dref: {dREF}");
+
+            //Task writeWood2Task = w2.AsyncWriteWoodToDB();
+            //await Task.WhenAll(writeWood2Task);
+            //Task escapeWood2 = w2.AsyncEscape(m2);
+            //await Task.WhenAll(escapeWood2);
+            #endregion
 
             ///
             ///End Refactored/Async way
