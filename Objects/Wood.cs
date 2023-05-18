@@ -5,6 +5,7 @@ using System.IO;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace EscapeFromTheWoods
 {
@@ -237,7 +238,8 @@ namespace EscapeFromTheWoods
                 visited.Add(monkey.tree.treeID);
                 SortedDictionary<double, List<Tree>> distanceToMonkey = new SortedDictionary<double, List<Tree>>();
 
-                //zoek dichtste boom die nog niet is bezocht            
+                //zoek dichtste boom die nog niet is bezocht
+                // refactor: loop niet over alle bomen
                 foreach (Tree t in trees)
                 {
                     if ((!visited.Contains(t.treeID)) && (!t.hasMonkey))
