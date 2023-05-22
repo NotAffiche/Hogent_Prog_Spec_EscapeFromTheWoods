@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,12 +12,18 @@ namespace EscapeFromTheWoods
         static async Task Main(string[] args)
         {
             Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
             Console.WriteLine("Hello World!");
             string msSqlConnectionString = @"Data Source=.\SQLExpress;Initial Catalog=EscapeFromTheWoods;Integrated Security=True";
             string mongoDbConnectionString = "mongodb://localhost:27017";
             DBwriter db = new DBwriter(msSqlConnectionString, mongoDbConnectionString);
 
+            string input = Console.ReadLine();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("START");
+            Console.ForegroundColor = ConsoleColor.White;
+            TimeSpan setupWoodsPlaceMonkeysDuration, ogCodeDuration, refactoredCodeDuration;
+
+            stopwatch.Start();
             string path = @"C:\NET\monkeys";
             Map m1 = new Map(0, 500, 0, 500);
             Wood w1 = WoodBuilder.GetWood(500, m1, path,db);
@@ -40,14 +47,47 @@ namespace EscapeFromTheWoods
             w3.PlaceMonkey("Kenji", IDgenerator.GetMonkeyID());
             w3.PlaceMonkey("Kobe", IDgenerator.GetMonkeyID());
             w3.PlaceMonkey("Kendra", IDgenerator.GetMonkeyID());
+            stopwatch.Stop();
+            setupWoodsPlaceMonkeysDuration = stopwatch.Elapsed;
+            stopwatch.Reset();
 
-            //w1.WriteWoodToDB();
-            //w2.WriteWoodToDB();
-            //w3.WriteWoodToDB();
-            //w1.Escape();
-            //w2.Escape();
-            //w3.Escape();
+            //
+            stopwatch.Start();
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("OG");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            w1.WriteWoodToDB();
+            w2.WriteWoodToDB();
+            w3.WriteWoodToDB();
+            w1.Escape();
+            w2.Escape();
+            w3.Escape();
             //Time elapsed: 00:00:02.1623876 | 1272 | 5000
+            stopwatch.Stop();
+            ogCodeDuration = stopwatch.Elapsed;
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("OG CODE | Time elapsed: {0}", stopwatch.Elapsed);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("end");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            stopwatch.Reset();
+            //setup for refactored (delete bitmaps)
+            const string rootFolder = @"C:\NET\monkeys\";
+            const string fileA = "0_escapeRoutes.jpg";
+            const string fileB = "1_escapeRoutes.jpg";
+            const string fileC = "2_escapeRoutes.jpg";
+            File.Delete(Path.Combine(rootFolder, fileA));
+            File.Delete(Path.Combine(rootFolder, fileB));
+            File.Delete(Path.Combine(rootFolder, fileC));
+
+            stopwatch.Start();
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.WriteLine("Refactored");
+            Console.ForegroundColor = ConsoleColor.White;
 
             ///New Refactored/Async way
             ///
@@ -91,15 +131,30 @@ namespace EscapeFromTheWoods
 
             ///
             ///End Refactored/Async way
-
+            refactoredCodeDuration = stopwatch.Elapsed;
 
             stopwatch.Stop();
             // Write result.
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Time elapsed: {0}", stopwatch.Elapsed);
+            Console.WriteLine("REFACTORED CODE | Time elapsed: {0}", stopwatch.Elapsed);
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("end");
             Console.ForegroundColor = ConsoleColor.White;
+
+            Console.ForegroundColor = ConsoleColor.DarkBlue;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("====================================================");
+            Console.WriteLine("| Setup M+W       | Time elapsed: {0} |", setupWoodsPlaceMonkeysDuration);
+            Console.WriteLine("|         (Same setup for OG and REFACTOR)         |");
+            Console.WriteLine("| OG         CODE | Time elapsed: {0} |", ogCodeDuration);
+            Console.WriteLine("| REFACTORED CODE | Time elapsed: {0} |", refactoredCodeDuration);
+            Console.WriteLine("====================================================");
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Black;
         }
     }
 }
