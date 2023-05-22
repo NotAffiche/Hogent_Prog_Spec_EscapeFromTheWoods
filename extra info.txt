@@ -1,0 +1,2 @@
+Ma zelfs de OG code wordt super snel uitgevoerd (met mssql inserts), https://www.userbenchmark.com/UserRun/53790237 
+Laptop OG ~ 2min57s, Laptop refactored ~ 1.45s
